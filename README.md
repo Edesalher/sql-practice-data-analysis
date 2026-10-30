@@ -2,7 +2,13 @@
 
 A collection of hands-on **SQL Server (T-SQL)** exercises focused on building SQL querying skills and applying them to data analysis and business questions.
 
-This repository documents two stages of practice using the **Chinook sample database**: an initial 10-day program covering SQL fundamentals and intermediate techniques, followed by a second 10-day program focused on analytical thinking, interpreting results, and drawing meaningful conclusions.
+The practice uses **ChatGPT** and **Claude** as tutors to propose exercises and analytical questions, as well as to evaluate my SQL queries and conclusions.
+
+## Purpose
+
+This repository documents my progress toward becoming a **Data Analyst**, with an emphasis on using SQL not just to retrieve data, but also to answer questions and support data-informed decisions.
+
+The repository has two stages of practice using the **Chinook sample database**: an initial 10-day program covering SQL fundamentals and intermediate techniques, followed by a second 10-day program focused on analytical thinking, interpreting results, and drawing meaningful conclusions.
 
 ## Database
 
@@ -27,8 +33,6 @@ sql-practice-data-analysis/
 ├── .gitignore
 └── README.md
 ```
-
-> The `database/` directory is kept locally and excluded from Git.
 
 ## Practice overview
 
@@ -70,10 +74,6 @@ A second 10-day practice program emphasizing:
 4. Connect to the Chinook database and execute the queries.
 
 The scripts are organized by practice day; they are learning exercises rather than a single application that must be run in sequence.
-
-## Purpose
-
-This repository documents my progress toward becoming a **Data Analyst**, with an emphasis on using SQL not just to retrieve data, but also to answer questions and support data-informed decisions.
 
 ## Acknowledgments
 
