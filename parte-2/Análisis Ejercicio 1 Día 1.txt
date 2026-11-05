@@ -73,7 +73,8 @@ FROM Customer;
 - 6.98 facturas en promedio por cliente durante el período registrado.
 
 Con ese número y el gasto por factura, ¿qué tipo de negocio es: de compras grandes y poco frecuentes, o de compras pequeñas y repetidas?
-- De acuerdo al período registrado de casi 5 años, 6.98 facturas por cliente con un promedio de gasto por factura de 5.65, tenemos un negocio de compras pequeñas, poco frecuentes, pero con varios clientes, 59.
+- De acuerdo al período registrado de casi 5 años, 6.98 facturas por cliente con un promedio de gasto por factura de 5.65, tenemos un negocio de compras pequeñas, 
+  poco frecuentes, pero con varios clientes, 59.
 
 ¿Qué implica eso para el director? Por ejemplo, ¿qué le importaría más cuidar: conseguir clientes nuevos o que los actuales sigan comprando?
 - Que los actuales sigan comprando, incrementen su frecuencia de compra o gasto por compra.
@@ -81,6 +82,11 @@ Con ese número y el gasto por factura, ¿qué tipo de negocio es: de compras gr
 
 ******************** 4. CONCLUSIÓN ********************
 
-La empresa ha tenido un total de ingresos por ventas de 2,328.60 con 59 clientes, en promedio 39.47 ingresos por cliente; cifras calculadas en el período del 01 de enero de 2021 al 22 de diciembre de 2025. Durante el período indicado, se cuenta con un registro de 412 compras entre los 59 clientes, resultando en un promedio de 6.98 facturas por cliente y un ticket de 5.65. Si aproximamos el período a 5 años para las 412 ventas, cada cliente aproximadamente ha realizado 1.4 compras por año. De acuerdo a los datos, no se cuenta con una referencia para determinar si la frecuencia de compra y gasto por compra son cifras que estén por arriba o debajo de lo esperado.
+La empresa ha tenido un total de ingresos por ventas de 2,328.60 con 59 clientes, en promedio 39.47 ingresos por cliente; cifras calculadas en el período del 01 de enero de 2021 
+al 22 de diciembre de 2025. Durante el período indicado, se cuenta con un registro de 412 compras entre los 59 clientes, resultando en un promedio de 6.98 facturas por cliente y 
+un ticket de 5.65. Si aproximamos el período a 5 años para las 412 ventas, cada cliente aproximadamente ha realizado 1.4 compras por año. De acuerdo a los datos, no se cuenta con 
+una referencia para determinar si la frecuencia de compra y gasto por compra son cifras que estén por arriba o debajo de lo esperado.
 
-Estos datos son un resúmen general del período indicado que no indican la estabilidad o rentabilidad del negocio, para ello es conveniente analizar y comparar las ventas por año para saber si se han mantenido, aumentado o disminuido, el monto promedio en compras de cada cliente y que clientes gastan o compran más, considerando que no se cuenta con el dato sobre si los 59 clientes mencionados siguen comprando.
+Estos datos son un resúmen general del período indicado que no indican la estabilidad o rentabilidad del negocio, para ello es conveniente analizar y comparar las ventas por año 
+para saber si se han mantenido, aumentado o disminuido, el monto promedio en compras de cada cliente y que clientes gastan o compran más, considerando que no se cuenta con el dato 
+sobre si los 59 clientes mencionados siguen comprando.
