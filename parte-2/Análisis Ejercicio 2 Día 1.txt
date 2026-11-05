@@ -155,7 +155,9 @@ Máximo - 49.62
 - De acuerdo a la cantidad de compra, si. De acuerdo a la cantidad de gasto, no.
 
 ¿Está la actividad de ventas repartida de forma pareja entre los clientes, o se concentra en pocos?
-- La actividad se reparte de forma pareja en cuanto a cantidad de compras por los clientes, ya que de los 59 clientes, 58 han realizado 7 compras y el restante 6; diferencia de 1 compra. Sin embargo, en cuanto a cantidad de gasto, la actividad no es pareja, la diferencia de compra entre el cliente que ha gastado más con respecto al que ha gastado menos es de 12.98.
+- La actividad se reparte de forma pareja en cuanto a cantidad de compras por los clientes, ya que de los 59 clientes, 58 han realizado 7 compras y el restante 6; 
+  diferencia de 1 compra. Sin embargo, en cuanto a cantidad de gasto, la actividad no es pareja, la diferencia de compra entre el cliente que ha gastado más con 
+  respecto al que ha gastado menos es de 12.98.
 
 
 ******************** CONCLUSIÓN ********************
@@ -164,10 +166,14 @@ Respuesta a director:
 
 Depende del enfoque, los datos analizados sobre la actividad de ventas entre los 59 clientes muestran que compran en cantidades similares, pero con montos variados.
 
-Lo indicado se debe a que la cantidad de compra máxima y mínima es de 7 y 6 respectivamente, diferencia de 1 unidad, y se cuenta con un promedio de 6.98 facturas por cliente con un coeficiente de variación de 1.85%. 
+Lo indicado se debe a que la cantidad de compra máxima y mínima es de 7 y 6 respectivamente, diferencia de 1 unidad, y se cuenta con un promedio de 6.98 facturas 
+por cliente con un coeficiente de variación de 1.85%. 
 
-Por otro lado, el monto máximo y mínimo de compra es de 49.62 y 36.64 respectivamente, diferencia de 12.98, y se cuenta con un promedio de 39.47 de gasto por cliente con un coeficiente de variación de 7.31%. Esta es mayor en comparación a la variación de cantidad de compras por cliente.
+Por otro lado, el monto máximo y mínimo de compra es de 49.62 y 36.64 respectivamente, diferencia de 12.98, y se cuenta con un promedio de 39.47 de gasto por cliente 
+con un coeficiente de variación de 7.31%. Esta es mayor en comparación a la variación de cantidad de compras por cliente.
 
-No se cuenta con valores de referencia para determinar si la dispersión de los datos es alta o baja, por lo que únicamente se concluye comparando los calculos de compras y gastos utilizando el mismo conjunto de datos.
+No se cuenta con valores de referencia para determinar si la dispersión de los datos es alta o baja, por lo que únicamente se concluye comparando los calculos de compras 
+y gastos utilizando el mismo conjunto de datos.
 
-Para conocer el por qué de la variación de gasto en las compras a pesar de que los clientes compran en cantidades similares, convendría analizar el tipo música que cada cliente compra para determinar si se debe al género músical y los precios de las canciones por género.
+Para conocer el por qué de la variación de gasto en las compras a pesar de que los clientes compran en cantidades similares, convendría analizar el tipo música que cada 
+cliente compra para determinar si se debe al género músical y los precios de las canciones por género.
