@@ -113,7 +113,6 @@ WITH facturasClientes AS (
         Invoice.CustomerId,
         Customer.FirstName,
         Customer.LastName
-    ORDER BY total_spent DESC, CustomerId
 )
 SELECT DISTINCT
     SUM(total_invoices) AS sum_invoices,
@@ -146,7 +145,6 @@ WITH facturasClientes2 AS (
         Customer.CustomerId,
         Customer.FirstName,
         Customer.LastName
-    --ORDER BY total_spent DESC, Customer.CustomerId
 )
 SELECT DISTINCT
     SUM(total_invoices) AS sum_invoices,
@@ -205,3 +203,38 @@ SELECT DISTINCT
     PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY total_spent) OVER () AS median_spent
 FROM facturasClientes2;
 
+--Por Invoice: Aportación de cada cliente al gasto
+WITH GastosClientes AS (
+    SELECT
+        Invoice.CustomerId,
+        Customer.FirstName,
+        Customer.LastName,
+        COUNT(*) AS total_invoices,
+        SUM(Invoice.total) AS total_spent,
+        (SUM(Invoice.total)/SUM(SUM(Invoice.total)) OVER())*100 AS contribution
+    FROM Invoice
+    JOIN Customer ON Customer.CustomerId = Invoice.CustomerId
+    GROUP BY    
+        Invoice.CustomerId,
+        Customer.FirstName,
+        Customer.LastName
+)
+-- ,TopClients AS (
+--     SELECT TOP 12
+--         CustomerId,
+--         total_spent,
+--         contribution
+--     FROM GastosClientes
+--     ORDER BY total_spent DESC, CustomerId
+-- )
+SELECT 
+    CustomerId, 
+    FirstName, 
+    LastName, 
+    total_spent,
+    contribution
+FROM GastosClientes 
+ORDER BY total_spent DESC, CustomerId
+-- SELECT 
+--     CAST(SUM(contribution) AS DECIMAL(10, 2)) AS contribucion_top12
+-- FROM TopClients;
