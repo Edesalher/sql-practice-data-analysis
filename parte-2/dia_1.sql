@@ -49,6 +49,7 @@ SELECT
     total_ventas/numero_facturas AS promedio_gasto_compra,
     numero_clientes
 FROM Ventas;
+
 --por InvoiceLine
 WITH LineasVentas AS (
     SELECT 
@@ -68,8 +69,73 @@ SELECT
     total_ventas/numero_facturas AS promedio_gasto_compra,
     numero_clientes
 FROM LineasVentas;
+
 --validación de numero de clientes según facturas con los clientes registrados
 SELECT 
     COUNT(*) numero_clientes_registrados
 FROM Customer;
+
+
+-- EJERCICIO 1:
+/*
+    Contexto: el director comercial leyó tu resumen y hace una pregunta: “Si cada cliente compra en promedio unas 7 veces, ¿puedo suponer que todos mis clientes se comportan más o menos igual?”
+
+    Qué debes investigar:
+
+    ¿Qué tan parecido o distinto es el comportamiento de compra entre los 59 clientes? Considera tanto cuántas veces compran como cuánto gastan en total.
+    ¿Representa el promedio de 6.98 facturas por cliente a un cliente típico?
+    ¿Está la actividad de ventas repartida de forma pareja entre los clientes, o se concentra en pocos?
+
+    Requisitos:
+
+    -Tú eliges las métricas y la forma de mostrar cómo se distribuyen los clientes. Define cada una con su unidad.
+    -Valida tus resultados contra las cifras del Ejercicio 1 (ventas totales, facturas, clientes).
+    -Redacta una respuesta para el director en 4 o 5 frases: hallazgo principal primero, evidencia, una limitación, y una hipótesis claramente marcada como tal.
+
+    Criterios de éxito:
+
+    -Responde directamente la pregunta del director (sí, no o “depende”) apoyándote en cifras.
+    -Tu resultado se puede conciliar con lo que ya sabes del negocio.
+    -Distingues lo que los datos muestran de lo que supones sobre por qué los clientes se comportan así.
+*/
+
+--Por Invoice: totales y promedios
+WITH facturasClientes AS (
+    SELECT
+        Invoice.CustomerId,
+        Customer.FirstName,
+        Customer.LastName,
+        COUNT(*) AS total_invoices,
+        SUM(Invoice.total) AS total_spent
+    FROM Invoice
+    JOIN Customer ON Customer.CustomerId = Invoice.CustomerId
+    GROUP BY    
+        Invoice.CustomerId,
+        Customer.FirstName,
+        Customer.LastName
+    --ORDER BY total_spent DESC, CustomerId
+)
+SELECT
+    --AVG(CAST(total_invoices AS DECIMAL)) AS avg_invoices,
+    PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY total_invoices) OVER () AS median_invoices,
+    --AVG(total_spent) AS avg_spent,
+    PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY total_spent) OVER () AS median_spent
+FROM facturasClientes;
+
+
+--Por InvoiceLine
+SELECT
+    Customer.CustomerId,
+    Customer.FirstName,
+    Customer.LastName,
+    COUNT(DISTINCT InvoiceLine.InvoiceId) AS total_invoices,
+    SUM(InvoiceLine.Quantity * InvoiceLine.UnitPrice) AS total_spent
+FROM InvoiceLine
+JOIN Invoice ON Invoice.InvoiceId = InvoiceLine.InvoiceId
+JOIN Customer ON Customer.CustomerId = Invoice.CustomerId
+GROUP BY 
+    Customer.CustomerId,
+    Customer.FirstName,
+    Customer.LastName
+ORDER BY total_spent DESC, Customer.CustomerId;
 
