@@ -76,7 +76,7 @@ SELECT
 FROM Customer;
 
 
--- EJERCICIO 1:
+-- EJERCICIO 2:
 /*
     Contexto: el director comercial leyó tu resumen y hace una pregunta: “Si cada cliente compra en promedio unas 7 veces, ¿puedo suponer que todos mis clientes se comportan más o menos igual?”
 
@@ -99,7 +99,7 @@ FROM Customer;
     -Distingues lo que los datos muestran de lo que supones sobre por qué los clientes se comportan así.
 */
 
---Por Invoice: totales y promedios
+--Por Invoice: Totales, promedios, desviaciones y rango
 WITH facturasClientes AS (
     SELECT
         Invoice.CustomerId,
@@ -113,29 +113,95 @@ WITH facturasClientes AS (
         Invoice.CustomerId,
         Customer.FirstName,
         Customer.LastName
-    --ORDER BY total_spent DESC, CustomerId
+    ORDER BY total_spent DESC, CustomerId
 )
-SELECT
-    --AVG(CAST(total_invoices AS DECIMAL)) AS avg_invoices,
+SELECT DISTINCT
+    SUM(total_invoices) AS sum_invoices,
+    CAST(AVG(CAST(total_invoices AS DECIMAL)) AS DECIMAL(10, 2)) AS avg_invoices,
+    CAST(STDEVP(total_invoices) AS DECIMAL(10, 2)) AS dev_invoices,
+    CAST(STDEVP(total_invoices)/AVG(CAST(total_invoices AS DECIMAL))*100 AS DECIMAL(10, 2)) AS cv_invoices,
+    MIN(total_invoices) AS min_invoices,
+    MAX(total_invoices) AS max_invoices,
+    SUM(total_spent) AS sum_spent,
+    CAST(AVG(total_spent) AS DECIMAL(10, 2)) AS avg_spent,
+    CAST(STDEVP(total_spent) AS DECIMAL(10,2)) AS dev_spent,
+    CAST(STDEVP(total_spent)/AVG(total_spent)*100 AS DECIMAL(10,2)) AS cv_spent,
+    MIN(total_spent) AS min_spent,
+    MAX(total_spent) AS max_spent
+FROM facturasClientes;
+
+
+--Por InvoiceLine: Totales, promedios, desviaciones y rango
+WITH facturasClientes2 AS (
+    SELECT
+        Customer.CustomerId,
+        Customer.FirstName,
+        Customer.LastName,
+        COUNT(DISTINCT InvoiceLine.InvoiceId) AS total_invoices,
+        SUM(InvoiceLine.Quantity * InvoiceLine.UnitPrice) AS total_spent
+    FROM InvoiceLine
+    JOIN Invoice ON Invoice.InvoiceId = InvoiceLine.InvoiceId
+    JOIN Customer ON Customer.CustomerId = Invoice.CustomerId
+    GROUP BY 
+        Customer.CustomerId,
+        Customer.FirstName,
+        Customer.LastName
+    --ORDER BY total_spent DESC, Customer.CustomerId
+)
+SELECT DISTINCT
+    SUM(total_invoices) AS sum_invoices,
+    CAST(AVG(CAST(total_invoices AS DECIMAL)) AS DECIMAL(10, 2)) AS avg_invoices,
+    CAST(STDEVP(total_invoices) AS DECIMAL(10, 2)) AS dev_invoices,
+    CAST(STDEVP(total_invoices)/AVG(CAST(total_invoices AS DECIMAL))*100 AS DECIMAL(10, 2)) AS cv_invoices,
+    MIN(total_invoices) AS min_invoices,
+    MAX(total_invoices) AS max_invoices,
+    SUM(total_spent) AS sum_spent,
+    CAST(AVG(total_spent) AS DECIMAL(10, 2)) AS avg_spent,
+    CAST(STDEVP(total_spent) AS DECIMAL(10,2)) AS dev_spent,
+    CAST(STDEVP(total_spent)/AVG(total_spent)*100 AS DECIMAL(10,2)) AS cv_spent,
+    MIN(total_spent) AS min_spent,
+    MAX(total_spent) AS max_spent
+FROM facturasClientes2;
+
+--Por Invoice: Mediana
+WITH facturasClientes AS (
+    SELECT
+        Invoice.CustomerId,
+        Customer.FirstName,
+        Customer.LastName,
+        COUNT(*) AS total_invoices,
+        SUM(Invoice.total) AS total_spent
+    FROM Invoice
+    JOIN Customer ON Customer.CustomerId = Invoice.CustomerId
+    GROUP BY    
+        Invoice.CustomerId,
+        Customer.FirstName,
+        Customer.LastName
+)
+SELECT DISTINCT
     PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY total_invoices) OVER () AS median_invoices,
-    --AVG(total_spent) AS avg_spent,
     PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY total_spent) OVER () AS median_spent
 FROM facturasClientes;
 
 
---Por InvoiceLine
-SELECT
-    Customer.CustomerId,
-    Customer.FirstName,
-    Customer.LastName,
-    COUNT(DISTINCT InvoiceLine.InvoiceId) AS total_invoices,
-    SUM(InvoiceLine.Quantity * InvoiceLine.UnitPrice) AS total_spent
-FROM InvoiceLine
-JOIN Invoice ON Invoice.InvoiceId = InvoiceLine.InvoiceId
-JOIN Customer ON Customer.CustomerId = Invoice.CustomerId
-GROUP BY 
-    Customer.CustomerId,
-    Customer.FirstName,
-    Customer.LastName
-ORDER BY total_spent DESC, Customer.CustomerId;
+--Por InvoiceLine: Mediana
+WITH facturasClientes2 AS (
+    SELECT
+        Customer.CustomerId,
+        Customer.FirstName,
+        Customer.LastName,
+        COUNT(DISTINCT InvoiceLine.InvoiceId) AS total_invoices,
+        SUM(InvoiceLine.Quantity * InvoiceLine.UnitPrice) AS total_spent
+    FROM InvoiceLine
+    JOIN Invoice ON Invoice.InvoiceId = InvoiceLine.InvoiceId
+    JOIN Customer ON Customer.CustomerId = Invoice.CustomerId
+    GROUP BY 
+        Customer.CustomerId,
+        Customer.FirstName,
+        Customer.LastName
+)
+SELECT DISTINCT
+    PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY total_invoices) OVER () AS median_invoices,
+    PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY total_spent) OVER () AS median_spent
+FROM facturasClientes2;
 
