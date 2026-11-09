@@ -70,7 +70,7 @@ SELECT
     numero_clientes
 FROM LineasVentas;
 
---validación de numero de clientes según facturas con los clientes registrados
+--validación de numero de clientes registrados
 SELECT 
     COUNT(*) numero_clientes_registrados
 FROM Customer;
@@ -219,14 +219,6 @@ WITH GastosClientes AS (
         Customer.FirstName,
         Customer.LastName
 )
--- ,TopClients AS (
---     SELECT TOP 12
---         CustomerId,
---         total_spent,
---         contribution
---     FROM GastosClientes
---     ORDER BY total_spent DESC, CustomerId
--- )
 SELECT 
     CustomerId, 
     FirstName, 
@@ -235,6 +227,59 @@ SELECT
     contribution
 FROM GastosClientes 
 ORDER BY total_spent DESC, CustomerId
--- SELECT 
---     CAST(SUM(contribution) AS DECIMAL(10, 2)) AS contribucion_top12
--- FROM TopClients;
+
+--Por Invoice: Aportación de los primeros 12 clientes que más gastaron (El 20.34% de los 59 clientes)
+WITH GastosClientes AS (
+    SELECT
+        Invoice.CustomerId,
+        Customer.FirstName,
+        Customer.LastName,
+        COUNT(*) AS total_invoices,
+        SUM(Invoice.total) AS total_spent,
+        (SUM(Invoice.total)/SUM(SUM(Invoice.total)) OVER())*100 AS contribution
+    FROM Invoice
+    JOIN Customer ON Customer.CustomerId = Invoice.CustomerId
+    GROUP BY    
+        Invoice.CustomerId,
+        Customer.FirstName,
+        Customer.LastName
+)
+,TopClients AS (
+    SELECT TOP 12
+        CustomerId,
+        total_spent,
+        contribution
+    FROM GastosClientes
+    ORDER BY total_spent DESC, CustomerId
+)
+SELECT 
+    CAST(SUM(contribution) AS DECIMAL(10, 2)) AS contribucion_top12
+FROM TopClients;
+
+--Por Invoice: Aportación de los primeros 47 clientes que más gastaron (El 79.66% de los 59 clientes)
+WITH GastosClientes AS (
+    SELECT
+        Invoice.CustomerId,
+        Customer.FirstName,
+        Customer.LastName,
+        COUNT(*) AS total_invoices,
+        SUM(Invoice.total) AS total_spent,
+        (SUM(Invoice.total)/SUM(SUM(Invoice.total)) OVER())*100 AS contribution
+    FROM Invoice
+    JOIN Customer ON Customer.CustomerId = Invoice.CustomerId
+    GROUP BY    
+        Invoice.CustomerId,
+        Customer.FirstName,
+        Customer.LastName
+)
+,TopClients AS (
+    SELECT TOP 47
+        CustomerId,
+        total_spent,
+        contribution
+    FROM GastosClientes
+    ORDER BY total_spent DESC, CustomerId
+)
+SELECT 
+    CAST(SUM(contribution) AS DECIMAL(10, 2)) AS contribucion_top47
+FROM TopClients;
