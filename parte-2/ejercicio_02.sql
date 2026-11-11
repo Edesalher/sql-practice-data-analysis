@@ -1,0 +1,317 @@
+/*
+==================================================================================================================================================
+EJERCICIO 02
+DIA: 02
+
+Contexto: el director comercial leyó tu resumen y hace una pregunta: “Si cada cliente compra en promedio unas 7 veces, 
+¿puedo suponer que todos mis clientes se comportan más o menos igual?”
+
+Qué debes investigar:
+
+-¿Qué tan parecido o distinto es el comportamiento de compra entre los 59 clientes? Considera tanto cuántas veces compran como cuánto 
+ gastan en total.
+-¿Representa el promedio de 6.98 facturas por cliente a un cliente típico?
+-¿Está la actividad de ventas repartida de forma pareja entre los clientes, o se concentra en pocos?
+
+Requisitos:
+
+-Tú eliges las métricas y la forma de mostrar cómo se distribuyen los clientes. Define cada una con su unidad.
+-Valida tus resultados contra las cifras del Ejercicio 1 (ventas totales, facturas, clientes).
+-Redacta una respuesta para el director en 4 o 5 frases: hallazgo principal primero, evidencia, una limitación, y una hipótesis claramente 
+marcada como tal.
+
+Criterios de éxito:
+
+-Responde directamente la pregunta del director (sí, no o “depende”) apoyándote en cifras.
+-Tu resultado se puede conciliar con lo que ya sabes del negocio.
+-Distingues lo que los datos muestran de lo que supones sobre por qué los clientes se comportan así.
+
+==================================================================================================================================================
+MÉTRICAS
+
+| Pregunta                                                        | Metrica             | Definicion                                     | Unidad              |
+|-----------------------------------------------------------------|---------------------|------------------------------------------------|---------------------|
+| ¿Cuánto compra cada cliente?                                    | compras por cliente | Conteo de facturas por cliente                 | facturas            |
+| ¿Cuánto gasta cada cliente?                                     | gasto por cliente   | Suma de gasto total por cliente                | dinero              |
+| ¿Cuantos varían los datos de la media?                          | S, CV               | Desviación estándar y coeficiente de variación | numero y porcentaje |
+| ¿Cuál es el comportamiento del cliente central?                 | Me                  | Mediana de compras y gastos                    | numero              |
+| ¿Qué tan diferentes son los clientes con menor y mayor compras? | Min, Max            | Valor mínimo y maximo de facturas              | facturas            |
+| ¿Qué tan diferentes son los clientes con menor y mayor gasto?   | Min, Max            | Valor mínimo y máximo de gasto                 | dinero              |
+
+==================================================================================================================================================
+*/
+
+-- Consultas SQL
+
+--Por Invoice: Totales, promedios, desviaciones y rango
+WITH facturasClientes AS (
+    SELECT
+        Invoice.CustomerId,
+        Customer.FirstName,
+        Customer.LastName,
+        COUNT(*) AS total_invoices,
+        SUM(Invoice.total) AS total_spent
+    FROM Invoice
+    JOIN Customer ON Customer.CustomerId = Invoice.CustomerId
+    GROUP BY    
+        Invoice.CustomerId,
+        Customer.FirstName,
+        Customer.LastName
+)
+SELECT DISTINCT
+    SUM(total_invoices) AS sum_invoices,
+    CAST(AVG(CAST(total_invoices AS DECIMAL)) AS DECIMAL(10, 2)) AS avg_invoices,
+    CAST(STDEVP(total_invoices) AS DECIMAL(10, 2)) AS dev_invoices,
+    CAST(STDEVP(total_invoices)/AVG(CAST(total_invoices AS DECIMAL))*100 AS DECIMAL(10, 2)) AS cv_invoices,
+    MIN(total_invoices) AS min_invoices,
+    MAX(total_invoices) AS max_invoices,
+    SUM(total_spent) AS sum_spent,
+    CAST(AVG(total_spent) AS DECIMAL(10, 2)) AS avg_spent,
+    CAST(STDEVP(total_spent) AS DECIMAL(10,2)) AS dev_spent,
+    CAST(STDEVP(total_spent)/AVG(total_spent)*100 AS DECIMAL(10,2)) AS cv_spent,
+    MIN(total_spent) AS min_spent,
+    MAX(total_spent) AS max_spent
+FROM facturasClientes;
+
+
+--Por InvoiceLine: Totales, promedios, desviaciones y rango
+WITH facturasClientes2 AS (
+    SELECT
+        Customer.CustomerId,
+        Customer.FirstName,
+        Customer.LastName,
+        COUNT(DISTINCT InvoiceLine.InvoiceId) AS total_invoices,
+        SUM(InvoiceLine.Quantity * InvoiceLine.UnitPrice) AS total_spent
+    FROM InvoiceLine
+    JOIN Invoice ON Invoice.InvoiceId = InvoiceLine.InvoiceId
+    JOIN Customer ON Customer.CustomerId = Invoice.CustomerId
+    GROUP BY 
+        Customer.CustomerId,
+        Customer.FirstName,
+        Customer.LastName
+)
+SELECT DISTINCT
+    SUM(total_invoices) AS sum_invoices,
+    CAST(AVG(CAST(total_invoices AS DECIMAL)) AS DECIMAL(10, 2)) AS avg_invoices,
+    CAST(STDEVP(total_invoices) AS DECIMAL(10, 2)) AS dev_invoices,
+    CAST(STDEVP(total_invoices)/AVG(CAST(total_invoices AS DECIMAL))*100 AS DECIMAL(10, 2)) AS cv_invoices,
+    MIN(total_invoices) AS min_invoices,
+    MAX(total_invoices) AS max_invoices,
+    SUM(total_spent) AS sum_spent,
+    CAST(AVG(total_spent) AS DECIMAL(10, 2)) AS avg_spent,
+    CAST(STDEVP(total_spent) AS DECIMAL(10,2)) AS dev_spent,
+    CAST(STDEVP(total_spent)/AVG(total_spent)*100 AS DECIMAL(10,2)) AS cv_spent,
+    MIN(total_spent) AS min_spent,
+    MAX(total_spent) AS max_spent
+FROM facturasClientes2;
+
+--Por Invoice: Mediana
+WITH facturasClientes AS (
+    SELECT
+        Invoice.CustomerId,
+        Customer.FirstName,
+        Customer.LastName,
+        COUNT(*) AS total_invoices,
+        SUM(Invoice.total) AS total_spent
+    FROM Invoice
+    JOIN Customer ON Customer.CustomerId = Invoice.CustomerId
+    GROUP BY    
+        Invoice.CustomerId,
+        Customer.FirstName,
+        Customer.LastName
+)
+SELECT DISTINCT
+    PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY total_invoices) OVER () AS median_invoices,
+    PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY total_spent) OVER () AS median_spent
+FROM facturasClientes;
+
+
+--Por InvoiceLine: Mediana
+WITH facturasClientes2 AS (
+    SELECT
+        Customer.CustomerId,
+        Customer.FirstName,
+        Customer.LastName,
+        COUNT(DISTINCT InvoiceLine.InvoiceId) AS total_invoices,
+        SUM(InvoiceLine.Quantity * InvoiceLine.UnitPrice) AS total_spent
+    FROM InvoiceLine
+    JOIN Invoice ON Invoice.InvoiceId = InvoiceLine.InvoiceId
+    JOIN Customer ON Customer.CustomerId = Invoice.CustomerId
+    GROUP BY 
+        Customer.CustomerId,
+        Customer.FirstName,
+        Customer.LastName
+)
+SELECT DISTINCT
+    PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY total_invoices) OVER () AS median_invoices,
+    PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY total_spent) OVER () AS median_spent
+FROM facturasClientes2;
+
+--Por Invoice: Aportación de cada cliente al gasto
+WITH GastosClientes AS (
+    SELECT
+        Invoice.CustomerId,
+        Customer.FirstName,
+        Customer.LastName,
+        COUNT(*) AS total_invoices,
+        SUM(Invoice.total) AS total_spent,
+        (SUM(Invoice.total)/SUM(SUM(Invoice.total)) OVER())*100 AS contribution
+    FROM Invoice
+    JOIN Customer ON Customer.CustomerId = Invoice.CustomerId
+    GROUP BY    
+        Invoice.CustomerId,
+        Customer.FirstName,
+        Customer.LastName
+)
+SELECT 
+    CustomerId, 
+    FirstName, 
+    LastName, 
+    total_spent,
+    contribution
+FROM GastosClientes 
+ORDER BY total_spent DESC, CustomerId
+
+--Por Invoice: Aportación de los primeros 12 clientes que más gastaron (El 20.34% de los 59 clientes)
+WITH GastosClientes AS (
+    SELECT
+        Invoice.CustomerId,
+        Customer.FirstName,
+        Customer.LastName,
+        COUNT(*) AS total_invoices,
+        SUM(Invoice.total) AS total_spent,
+        (SUM(Invoice.total)/SUM(SUM(Invoice.total)) OVER())*100 AS contribution
+    FROM Invoice
+    JOIN Customer ON Customer.CustomerId = Invoice.CustomerId
+    GROUP BY    
+        Invoice.CustomerId,
+        Customer.FirstName,
+        Customer.LastName
+)
+,TopClients AS (
+    SELECT TOP 12
+        CustomerId,
+        total_spent,
+        contribution
+    FROM GastosClientes
+    ORDER BY total_spent DESC, CustomerId
+)
+SELECT 
+    CAST(SUM(contribution) AS DECIMAL(10, 2)) AS contribucion_top12
+FROM TopClients;
+
+--Por Invoice: Aportación de los primeros 47 clientes que más gastaron (El 79.66% de los 59 clientes)
+WITH GastosClientes AS (
+    SELECT
+        Invoice.CustomerId,
+        Customer.FirstName,
+        Customer.LastName,
+        COUNT(*) AS total_invoices,
+        SUM(Invoice.total) AS total_spent,
+        (SUM(Invoice.total)/SUM(SUM(Invoice.total)) OVER())*100 AS contribution
+    FROM Invoice
+    JOIN Customer ON Customer.CustomerId = Invoice.CustomerId
+    GROUP BY    
+        Invoice.CustomerId,
+        Customer.FirstName,
+        Customer.LastName
+)
+,TopClients AS (
+    SELECT TOP 47
+        CustomerId,
+        total_spent,
+        contribution
+    FROM GastosClientes
+    ORDER BY total_spent DESC, CustomerId
+)
+SELECT 
+    CAST(SUM(contribution) AS DECIMAL(10, 2)) AS contribucion_top47
+FROM TopClients;
+
+
+/*
+==================================================================================================================================================
+VALIDACIÓN CONTRA EJERCICIO 1
+
+| Cifra                         | Ejercicio 1 | Ejercicio 2 - Por Invoice | Ejercicio 2 - Por InvoiceLine | ¿Coincide? |
+|-------------------------------|-------------|---------------------------|-------------------------------|------------|
+| total ventas                  | 2,328.60    | 2,328.60                  | 2,328.60                      | Si         |
+| total facturas                | 412         | 412                       | 412                           | Si         |
+| promedio facturas por cliente | 6.98        | 6.98                      | 6.98                          | Si         |
+| promedio gasto por cliente    | 39.47       | 39.47                     | 39.47                         | Si         |
+
+==================================================================================================================================================
+ANÁLISIS
+
+Considerando los siguiente datos calculados con 59 clientes de acuerdo a las consultas realizadas en la base de datos
+
+COMPRAS:
+Total - 412
+Media - 6.98
+Mediana - 7
+Desv. estándar - 0.13
+Coeficiente variación - 1.85%
+Mínimo - 6
+Máximo - 7
+Media con desv. estándar: 6.98 +/- 0.13 [6.85 - 7.11]
+
+GASTOS:
+Total - 2,328.60
+Media - 39.47
+Mediana - 37.62
+Desv. estándar - 2.89
+Coeficiente variación - 7.31%
+Mínimo - 36.64
+Máximo - 49.62
+Media con desv. estándar: 39.47 +/- 2.89 [36.58 - 42.36]
+
+CONCENTRACIÓN: CONTRIBUCIÓN AL GASTO
+| Clientes ordenados de mayor a menor gasto | % de clientes | % de ventas |
+|-------------------------------------------|--------------:|------------:|
+| Primeros 10 de 59                         |       16.95 % |     19.37 % |
+| Primeros 12 de 59                         |       20.34 % |     22.91 % |
+| Primeros 47 de 59                         |       79.66 % |     80.65 % |
+
+- El cliente 11 gastó 41.62 y los clientes  12, 13, 14  gastaron los mismo, 40.62, por lo que  el top 12 que tengo no sería el único posible, 
+  pero no afectaría a mis resultados.
+- El cliente que más gasta se aleja 10.15 de la media y el cliente que menos gasta se aleja 2.83 de la media; no es simétrica la diferencia. 
+  Revisando la tabla de contribuciones los primeros 10 clientes de mayor gasto (16.95 % de los 59) han gastado un monto que está alejado a más 
+  de una desviación estándar de la media. Sumando los porcentajes de los 10 clientes, estos aportan un 19.37% al total lo cual es una diferencia 
+  de 2.42 puntos porcentuales respecto al 16.95 %; esto puede indicar el porqué de la diferencia porcentual de los primeros 12 clientes con 
+  respecto a su aportación al total.
+
+==================================================================================================================================================
+RESPUESTAS
+
+¿Qué tan parecido o distinto es el comportamiento de compra entre los 59 clientes? Considera tanto cuántas veces compran como cuánto gastan en total.
+- Los clientes compran en cantidades similares, pero gastan en montos distintos.
+
+¿Representa el promedio de 6.98 facturas por cliente a un cliente típico?
+- Si, debido a que la media de compra presenta una baja desviación estándar (0.13) y el valor central (7) está a 
+  menos de una desviación estándar de la media. De manera similar, la media de gasto (39.47) presenta una desviación estándar de 2.89 y el valor 
+  central (37.62) también está a menos de una desviación estándar de la media.
+
+¿Está la actividad de ventas repartida de forma pareja entre los clientes, o se concentra en pocos?
+- Durante el periódo analizado y de acuerdo a las contribuciones de gasto calculadas, las ventas estuvieron relativamente distribuidas entre los 59 
+  clientes. Los 12 de mayor gasto aportaron el 22.91% de las ventas y 47 clientes aportaron arriba del 80% del total.
+
+==================================================================================================================================================
+CONCLUSIÓN
+
+Respuesta a director:
+
+Sí. Durante el período analizados, la frecuencia de compra registrada fue muy similar entre los clientes. De los 59, 58 tuvieron exactamente siete 
+facturas. El gasto mostró más diferencias, con alrededor de diez clientes en el extremo superior. Aun así, los 12 clientes que más gastaron, 
+aproximadamente el 20 % del total, aportaron el 22,91 % de las ventas. En conjunto, las ventas estuvieron relativamente repartidas entre los clientes.
+
+La similitud en el número de facturas debe interpretarse a partir de los registros disponibles. Sin conocer cómo se registraron las compras, no 
+podemos confirmar si esa uniformidad refleja el comportamiento real de los clientes o si se debe, en parte, al proceso de registro.
+
+Para entender por qué algunos clientes gastaron más, convendría comparar cuántas canciones compraron por factura y cuánto pagaron por canción. 
+Si se observan diferencias en el precio, se podría revisar si están asociadas con los géneros que compró cada grupo.
+
+Si el objetivo es segmentar a los clientes con los datos disponibles, el gasto total por cliente ofrece más información para distinguirlos que el 
+número de facturas.
+
+==================================================================================================================================================
+*/
