@@ -1,7 +1,7 @@
 /*
 ==================================================================================================================================================
 EJERCICIO 02
-DIA: 02
+DIA: 01
 
 Contexto: el director comercial leyó tu resumen y hace una pregunta: “Si cada cliente compra en promedio unas 7 veces, 
 ¿puedo suponer que todos mis clientes se comportan más o menos igual?”
@@ -42,6 +42,9 @@ MÉTRICAS
 */
 
 -- Consultas SQL
+
+USE Chinook_AutoIncrement;
+GO
 
 --Por Invoice: Totales, promedios, desviaciones y rango
 WITH facturasClientes AS (
