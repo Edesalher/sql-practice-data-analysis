@@ -1,0 +1,141 @@
+/*
+DÍA 1: Radiografía del negocio
+Objetivo del día: pasar de una pregunta general de negocio a un conjunto pequeño de métricas bien definidas, y explicar qué significan y 
+qué no significan.
+*/
+
+/*
+==================================================================================================================================================
+EJERCICIO 01:
+DÍA: 01
+
+Contexto: Chinook es una tienda digital de música. Acaba de llegar un nuevo director comercial que no conoce el negocio. 
+Antes de su primera reunión te pide un resumen general, sin tecnicismos, de qué tan grande es la empresa y a cuántos clientes vende.
+
+Qué debes investigar:
+
+-¿Cuánto ha vendido la empresa en total?
+-¿Cuántas compras (facturas) se han realizado?
+-¿Cuántos clientes distintos han comprado?
+-¿Cuánto gasta, en promedio, un cliente por compra?
+-¿Qué período cubren los datos?
+
+Requisitos:
+
+-Tú decides qué tablas y columnas necesitas. Parte de la pregunta de negocio, no de la sintaxis.
+-Entrega tus cifras en una forma que el director pueda leer de un vistazo.
+-Comprueba por tu cuenta que tus cifras son coherentes entre sí. Si puedes obtener la misma cifra por dos caminos distintos y coinciden, mejor.
+
+Criterios de éxito:
+
+-Las cinco preguntas están respondidas con cifras correctas.
+-Las métricas están definidas con claridad. Por ejemplo, debes poder explicar qué cuenta exactamente “cliente” y qué significa “promedio” en tu 
+ resultado.
+-Tu interpretación incluye al menos una conclusión respaldada por los datos y al menos una cosa que no puedes concluir con ellos.
+
+==================================================================================================================================================
+1. TABLA DE MÉTRICAS 
+
+| Pregunta                             | Metrica                | Definicion exacta                   | Unidad             |
+|--------------------------------------|------------------------|-------------------------------------|--------------------|
+| ¿Cuánto se ha vendido?               | Ventas totales         | Suma de totales de facturas         | dinero             |
+| ¿Cuántas compras?                    | Número de facturas     | Conteo de facturas                  | facturas           |
+| ¿A cuántos clientes?                 | Clientes que compraron | Conteo de clientes de facturas      | clientes           |
+| ¿Cuánto gasta un cliente por compra? | Ticket promedio        | Ventas totales ÷ Número de facturas | dinero por factura |
+| ¿Qué período cubren los datos?       | Primera y última fecha | Fecha de primera y última factura   | fechas             |
+
+==================================================================================================================================================
+*/
+
+-- Consultas SQL
+
+USE Chinook_AutoIncrement;
+GO
+
+--por Invoice
+WITH Ventas AS (
+    SELECT 
+        CAST(MIN(InvoiceDate) AS DATE) AS fecha_desde,
+        CAST(MAX(InvoiceDate) AS DATE) AS fecha_hasta,
+        SUM(Total) AS total_ventas,
+        COUNT(*) AS numero_facturas,
+        COUNT(DISTINCT CustomerId) AS numero_clientes
+    FROM Invoice
+)
+SELECT
+    fecha_desde,
+    fecha_hasta,
+    total_ventas,
+    numero_facturas,
+    total_ventas/numero_facturas AS promedio_gasto_compra,
+    numero_clientes
+FROM Ventas;
+
+--por InvoiceLine
+WITH LineasVentas AS (
+    SELECT 
+        CAST(MIN(InvoiceDate) AS DATE) AS fecha_desde,
+        CAST(MAX(InvoiceDate) AS DATE) AS fecha_hasta,
+        SUM(InvoiceLine.Quantity * InvoiceLine.UnitPrice) AS total_ventas,
+        COUNT(DISTINCT InvoiceLine.InvoiceId) AS numero_facturas,
+        COUNT(DISTINCT Invoice.CustomerId) AS numero_clientes
+    FROM InvoiceLine
+    JOIN Invoice ON Invoice.InvoiceId = InvoiceLine.InvoiceId
+)
+SELECT
+    fecha_desde,
+    fecha_hasta,
+    total_ventas,
+    numero_facturas,
+    total_ventas/numero_facturas AS promedio_gasto_compra,
+    numero_clientes
+FROM LineasVentas;
+
+--validación de numero de clientes registrados
+SELECT 
+    COUNT(*) numero_clientes_registrados
+FROM Customer;
+
+
+/*
+==================================================================================================================================================
+2. TABLA DE VALIDACIÓN 
+
+| Cifra                  | Camino 1 por Invoice   | Camino 2 por InvoiceLine | ¿Coincide? |
+|------------------------|------------------------|--------------------------|------------|
+| Ventas totales         | 2328,60                | 2328,60                  | si         |
+| Facturas               | 412                    | 412                      | si         |
+| Clientes que compraron | 59                     | 59                       | si         |
+| Promedio gasto compra  | 5.65                   | 5.65                     | si         |
+| Primera y última fecha | 2021-01-01, 2025-12-22 | 2021-01-01, 2025-12-22   | si         |
+| Cantidad de clientes   | 59                     | 59                       | sí         |
+
+==================================================================================================================================================
+3. RESPUESTAS
+
+¿Cuántas facturas hay por cada cliente en promedio? (Relaciona 412 con 59.)
+- 6.98 facturas en promedio por cliente durante el período registrado.
+
+Con ese número y el gasto por factura, ¿qué tipo de negocio es: de compras grandes y poco frecuentes, o de compras pequeñas y repetidas?
+- De acuerdo al período registrado de casi 5 años, 6.98 facturas por cliente con un promedio de gasto por factura de 5.65, tenemos un negocio 
+  de compras pequeñas, poco frecuentes, pero con varios clientes, 59.
+
+¿Qué implica eso para el director? Por ejemplo, ¿qué le importaría más cuidar: conseguir clientes nuevos o que los actuales sigan comprando?
+- Que los actuales sigan comprando, incrementen su frecuencia de compra o gasto por compra.
+
+==================================================================================================================================================
+4. CONCLUSIÓN
+
+La empresa ha tenido un total de ingresos por ventas de 2,328.60 con 59 clientes, en promedio 39.47 ingresos por cliente; cifras calculadas en el 
+período del 01 de enero de 2021 al 22 de diciembre de 2025. Durante el período indicado, se cuenta con un registro de 412 compras entre los 59 
+clientes, resultando en un promedio de 6.98 facturas por cliente y un ticket de 5.65. Si aproximamos el período a 5 años para las 412 ventas, cada 
+cliente aproximadamente ha realizado 1.4 compras por año. De acuerdo a los datos, no se cuenta con una referencia para determinar si la frecuencia 
+de compra y gasto por compra son cifras que estén por arriba o debajo de lo esperado.
+
+Estos datos son un resúmen general del período indicado que no indican la estabilidad o rentabilidad del negocio, para ello es conveniente analizar 
+y comparar las ventas por año para saber si se han mantenido, aumentado o disminuido, el monto promedio en compras de cada cliente y que clientes 
+gastan o compran más, considerando que no se cuenta con el dato sobre si los 59 clientes mencionados siguen comprando.
+
+==================================================================================================================================================
+*/
+
