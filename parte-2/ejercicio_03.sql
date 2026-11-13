@@ -16,6 +16,15 @@ Requisitos:
 -Explica cómo comprobarías, después de implementarlo, si el programa funcionó.
 
 ==================================================================================================================================================
+METRICAS
+
+| Analisis             | Pregunta que busca responder                                                      |
+|----------------------|-----------------------------------------------------------------------------------|
+| Frecuencia de compra | ¿Cada cuánto tiempo compra normalmente cada cliente?                              |
+| Evolución de compras | ¿Ha disminuido la cantidad de compras de estos clientes durante los últimos años? |
+| Recencia             | ¿Cuántos días han transcurrido desde su última compra respecto al 22/12/2025?     |
+
+==================================================================================================================================================
 */
 
 -- Consultas SQL
@@ -110,6 +119,42 @@ SELECT *, YEAR(last_invoice_date) AS last_invoice_year
 FROM TopCustomers
 ORDER BY last_invoice_date DESC;
 
+--Frecuencia de compra de clientes
+WITH InvoiceDates AS (
+    SELECT 
+        Invoice.CustomerId,
+        CONCAT(FirstName, ' ', LastName) AS customer,
+        Invoice.Total,
+        Invoice.InvoiceDate AS invoice_date,
+        LAG(Invoice.InvoiceDate) OVER(PARTITION BY Invoice.CustomerId ORDER BY InvoiceDate) AS previous_invoice_date,
+        MAX(Invoice.InvoiceDate) OVER(PARTITION BY Invoice.CustomerId) AS customer_last_invoice_date,
+        MAX(Invoice.InvoiceDate) OVER() AS general_last_invoice_date
+    FROM Invoice
+    JOIN Customer ON Customer.CustomerId = Invoice.CustomerId
+)
+SELECT
+    CustomerId, 
+    customer,
+    invoice_date,
+    previous_invoice_date,
+    DATEDIFF(day, previous_invoice_date, invoice_date) AS days_since_previous,
+    customer_last_invoice_date,
+    general_last_invoice_date,
+    DATEDIFF(day, customer_last_invoice_date, general_last_invoice_date) AS days_since_last_purchase
+FROM InvoiceDates
+WHERE CustomerId = 6
+-- WHERE CustomerId IN (
+--     SELECT TOP 10
+--         Invoice.CustomerId
+--         -- Customer.FirstName,
+--         -- Customer.LastName,
+--         -- SUM(Invoice.total) AS total_spent
+--     FROM Invoice
+--     JOIN Customer ON Customer.CustomerId = Invoice.CustomerId
+--     GROUP BY Invoice.CustomerId, Customer.FirstName, Customer.LastName
+--     ORDER BY SUM(Invoice.total) DESC
+-- )
+
 
 /*
 ==================================================================================================================================================
@@ -151,7 +196,6 @@ Contribuciones al gasto
 - Sabiendo que la fecha de la última factura, de las 412, es 2025-12-22 (diciembre 2025):
     Del top 10 de clientes que más gastaron 9 compraron por última vez en 2025. El restante compró la última vez en octubre 2024.
     De los 9 que compraron por última vez en 2025, solo 1 compró por última vez en diciembre 2025.
-    Los datos no aseguran que el top 10 de clientes seguirá comprando en próximos años.
 
 ==================================================================================================================================================
 */
